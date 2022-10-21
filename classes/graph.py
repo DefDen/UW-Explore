@@ -29,6 +29,7 @@ class Graph:
         # maps coordinates to nodes
         self.nodes = {}
 
+    # creates the graph
     def construct(self):
         # add edges and associated nodes to the graph
         for path in self.paths:
@@ -52,6 +53,28 @@ class Graph:
             # update building field on node to its building
             self.nodes[building.coordinates].building = building
 
+    # dfs to check for connectivity
+    def is_connected(self):
+        visited = set()
+        stack = []
+        stack.append(list(self.nodes.values())[0])
+        return Graph.__is_connected(self, visited, stack)
+
+    def __is_connected(self, visited, stack):
+        if not stack:
+            if len(visited) == len(self.nodes): return True
+            else: return False
+        n = stack.pop()
+        if n in visited: return Graph.__is_connected(self, visited, stack)
+        visited.add(n)
+        for c in n.neighbors.keys():
+            stack.append(self.nodes[c])
+        return Graph.__is_connected(self, visited, stack)
+        
 g = Graph()
 g.construct()
-print(len(g.nodes))
+print('min_x = ' + str(g.parser.min_x))
+print('min_y = ' + str(g.parser.min_y))
+print('max_x = ' + str(g.parser.max_x))
+print('max_y = ' + str(g.parser.max_y))
+print('is_connected = ' + str(g.is_connected()))
