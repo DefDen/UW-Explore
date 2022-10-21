@@ -1,5 +1,6 @@
 import util
 
+import sys
 class Node:
     def __init__(self, coordinates=(0,0), building=None):
         if building:
@@ -71,6 +72,7 @@ class Graph:
             stack.append(self.nodes[c])
         return Graph.__is_connected(self, visited, stack)
         
+sys.setrecursionlimit(100000)
 g = Graph()
 g.construct()
 print('min_x = ' + str(g.parser.min_x))
