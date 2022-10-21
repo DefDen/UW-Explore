@@ -42,17 +42,17 @@ class Parser:
             first = True
             for line in tsv_file:
                 if first:
-                    self.min_x = line[0]
-                    self.min_y = line[1]
-                    self.max_x = line[0]
-                    self.max_y = line[1]
+                    self.min_x = float(line[0])
+                    self.min_y = float(line[1])
+                    self.max_x = float(line[0])
+                    self.max_y = float(line[1])
                     first = False
                 if debug:
                     print(line)
-                self.min_x = min(self.min_x, line[0], line[2])
-                self.min_y = min(self.min_y, line[1], line[3])
-                self.max_x = max(self.max_x, line[0], line[2])
-                self.max_y = max(self.max_y, line[1], line[3])
+                self.min_x = min(float(self.min_x), float(line[0]), float(line[2]))
+                self.min_y = min(float(self.min_y), float(line[1]), float(line[3]))
+                self.max_x = max(float(self.max_x), float(line[0]), float(line[2]))
+                self.max_y = max(float(self.max_y), float(line[1]), float(line[3]))
                 paths.append(Path((line[0], line[1]), (line[2], line[3]), line[4]))
                 self.paths.append(Path((line[0], line[1]), (line[2], line[3]), line[4]))
         return paths
