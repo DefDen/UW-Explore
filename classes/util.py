@@ -11,6 +11,10 @@ class Path:
         self.start = start
         self.end = end
         self.distance = distance
+        self.slope = Path.__find_slope(start, end)
+
+    def __find_slope(start, end):
+        return (start[1] - end[1]) / (start[0] - end[0])
 
 class Parser:
     def __init__(self, file_path='../data'):
