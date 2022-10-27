@@ -1,6 +1,7 @@
 import util
-
 import sys
+import pygame
+
 class Node:
     def __init__(self, coordinates=(0,0), building=None):
         if building:
@@ -71,12 +72,46 @@ class Graph:
         for c in n.neighbors.keys():
             stack.append(self.nodes[c])
         return Graph.__is_connected(self, visited, stack)
+
+    def visualize(self, width=1000, aspect_ratio=1, building_color=(0,0,255), node_color=(0,0,0), path_color=(0,0,0), building_radius=5, node_radius=1, path_width=1):
+        pygame.init()
+        display_dimensions = [aspect_ratio * width, width]
+        screen = pygame.display.set_mode(display_dimensions)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            screen.fill((255,255,255))
+            for node_coordinates in self.nodes.keys():
+                c = Graph.__normalize_coordinates(node_coordinates, display_dimensions)
+                pygame.draw.circle(screen, node_color, c, node_radius)
+            for building in self.buildings:
+                c = Graph.__normalize_coordinates(building.coordinates, display_dimensions)
+                pygame.draw.circle(screen, building_color, c, building_radius)
+            for path in self.paths:
+                c_start = Graph.__normalize_coordinates(path.start, display_dimensions)
+                c_end = Graph.__normalize_coordinates(path.end, display_dimensions)
+                pygame.draw.line(screen, path_color, c_start, c_end, path_width)
+            pygame.display.flip()
+        pygame.quit()
+
+    def __normalize_coordinates(coordinates, display_dimensions, padding=10, max_x=4000, max_y=3000):
+        percent_x = float(coordinates[0]) / max_x
+        percent_y = float(coordinates[1]) / max_y
+        new_x = percent_x * display_dimensions[0]
+        new_y = percent_y * display_dimensions[0]
+        return (new_x + padding, new_y + padding)
+        
         
 sys.setrecursionlimit(100000)
 g = Graph()
 g.construct()
+"""
 print('min_x = ' + str(g.parser.min_x))
 print('min_y = ' + str(g.parser.min_y))
 print('max_x = ' + str(g.parser.max_x))
 print('max_y = ' + str(g.parser.max_y))
 print('is_connected = ' + str(g.is_connected()))
+"""
+g.visualize()
