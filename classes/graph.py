@@ -73,6 +73,7 @@ class Graph:
             stack.append(self.nodes[c])
         return Graph.__is_connected(self, visited, stack)
 
+    # visualizes the current graph
     def visualize(self, width=1000, aspect_ratio=1, building_color=(0,0,255), node_color=(0,0,0), path_color=(0,0,0), building_radius=5, node_radius=1, path_width=1):
         pygame.init()
         display_dimensions = [aspect_ratio * width, width]
@@ -96,14 +97,32 @@ class Graph:
             pygame.display.flip()
         pygame.quit()
 
+    # normalizes coordinates to the pygame display
     def __normalize_coordinates(coordinates, display_dimensions, padding=10, max_x=4000, max_y=3000):
         percent_x = float(coordinates[0]) / max_x
         percent_y = float(coordinates[1]) / max_y
         new_x = percent_x * display_dimensions[0]
         new_y = percent_y * display_dimensions[0]
         return (new_x + padding, new_y + padding)
-        
-        
+
+    # returns the set of paths traversed by bfs up to a certain depth
+    def bfs_paths(self, start_node, depth=3):
+        visited = set()
+        traversed = set()
+        queue = []
+        queue.append(start)
+        current_depth = 0
+        while queue and current_depth <= depth:
+            n = queue.pop(0)
+            if n in visited: continue
+            visited.add(n)
+            for c in n.neighbors.keys():
+                edge = n.neighbors[c]
+                traversed.append(edge)
+            current_depth += 1
+        return traversed
+
+# default limit too low for graph this size            
 sys.setrecursionlimit(100000)
 g = Graph()
 g.construct()
@@ -114,4 +133,16 @@ print('max_x = ' + str(g.parser.max_x))
 print('max_y = ' + str(g.parser.max_y))
 print('is_connected = ' + str(g.is_connected()))
 """
+"""
 g.visualize()
+"""
+# get a node from the graph
+key = None
+for k in g.nodes.keys():
+    key = k
+    break
+# use key to get node
+node = g.nodes[key]
+paths = g.bfs_paths(node)
+for p in paths:
+    print(p)

@@ -17,7 +17,7 @@ class Path:
         return (start[1] - end[1]) / (start[0] - end[0])
 
 class Parser:
-    def __init__(self, file_path='../data'):
+    def __init__(self, file_path='../data/'):
         self.file_path = file_path
         self.buildings = []
         self.paths = []
@@ -28,7 +28,7 @@ class Parser:
 
     def parse_buildings(self, debug=0):
         buildings = []
-        with open(str(self.file_path) + '/campus_buildings.tsv') as file:
+        with open(str(self.file_path) + 'campus_buildings.tsv') as file:
             tsv_file = csv.reader(file, delimiter='\t')
             next(tsv_file)
             for line in tsv_file:
@@ -40,7 +40,7 @@ class Parser:
 
     def parse_paths(self, debug=0):
         paths = []
-        with open(str(self.file_path) + '/campus_paths.tsv') as file:
+        with open(str(self.file_path) + 'campus_paths.tsv') as file:
             tsv_file = csv.reader(file, delimiter='\t')
             next(tsv_file)
             first = True
