@@ -12,16 +12,20 @@ class Path:
         self.start = start
         self.end = end
         self.distance = distance
-        self.slope = Path.__find_slope(start, end)
+        self.unit_vector = Path.__find_unit_vector(start, end, distance)
 
-    def __find_slope(start, end):
-        return float('inf') if (start[0] - end[0]) == 0 else (start[1] - end[1]) / (start[0] - end[0])
+    def __find_unit_vector(start, end, distance):
+        x = start[0] - end[0]
+        y = start[1] - end[1]
+        return (x / distance, y / distance)
 
 class Parser:
     def __init__(self, file_path='../data/'):
         self.file_path = file_path
         self.buildings = []
+        # short to long name
         self.short_to_long = {}
+        # short name to building
         self.short_to_building = {}
         self.paths = []
         self.min_x = 0

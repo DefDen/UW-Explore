@@ -1,6 +1,7 @@
 import util
 import sys
 import pygame
+import operator
 
 class Node:
     def __init__(self, coordinates=(0,0), building=None):
@@ -14,10 +15,20 @@ class Node:
 
 class Edge:
     def __init__(self, path=None):
-        self.path = path
         self.start = path.start
         self.end = path.end
         self.distance = path.distance
+        self.unit_vector = path.unit_vector
+
+    def get_points(self, padding=5):
+        points = []
+        num = 0
+        for num in range(int(self.distance / padding)):
+            # scalar tuple multiplication
+            vector = tuple(num * n for n in self.unit_vector)
+            # elementwise tuple addition
+            points.append(tuple(map(operator.add, self.start, vector)))
+        return points
 
 class Graph:
     def __init__(self):
@@ -26,6 +37,7 @@ class Graph:
         self.paths = self.parser.parse_paths()
         # maps coordinates to nodes
         self.nodes = {}
+        self.edges = []
 
     # creates the graph
     def construct(self):
@@ -38,11 +50,13 @@ class Graph:
                 self.nodes[path.end] = Node(path.end)
             # add edge from start of path to end of path
             self.nodes[path.start].neighbors[path.end] = Edge(path)
+            self.edges.append(Edge(path))
             # reverse the path direction and add it again (edges should not be directed)
             temp = path.start
             path.start = path.end
             path.end = temp
             self.nodes[path.start].neighbors[path.end] = Edge(path)
+            self.edges.append(Edge(path))
         # add names to the nodes where there are buildings
         for building in self.buildings:
             # if the building was not in the graph, something must have gone wrong since there would be no paths to it
@@ -70,11 +84,12 @@ class Graph:
         return Graph.__is_connected(self, visited, stack)
 
     # visualizes the current graph
-    def visualize(self, width=1000, aspect_ratio=1, building_color=(0,0,255), node_color=(0,0,0), path_color=(0,0,0), building_radius=5, node_radius=1, path_width=1):
+    def visualize(self, width=1000, aspect_ratio=1, building_color=(0,0,255), node_color=(0,0,0), path_color=(0,0,0), building_radius=5, node_radius=1, path_width=1, highlight_paths=[], highlight_path_color=(255,0,0), highlight_buildings=[], highlight_building_color=(0,255,255), additional_points=[], additional_points_color=(0,255,0)):
         pygame.init()
         display_dimensions = [aspect_ratio * width, width]
         screen = pygame.display.set_mode(display_dimensions)
         running = True
+        a = True
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -86,10 +101,22 @@ class Graph:
             for building in self.buildings:
                 c = Graph.__normalize_coordinates(building.coordinates, display_dimensions)
                 pygame.draw.circle(screen, building_color, c, building_radius)
-            for path in self.paths:
+            for path in self.edges:
                 c_start = Graph.__normalize_coordinates(path.start, display_dimensions)
                 c_end = Graph.__normalize_coordinates(path.end, display_dimensions)
                 pygame.draw.line(screen, path_color, c_start, c_end, path_width)
+            for path in highlight_paths:
+                c_start = Graph.__normalize_coordinates(path.start, display_dimensions)
+                c_end = Graph.__normalize_coordinates(path.end, display_dimensions)
+                pygame.draw.line(screen, highlight_path_color, c_start, c_end, path_width)
+            for point in additional_points:
+                c = Graph.__normalize_coordinates(point, display_dimensions)
+                pygame.draw.circle(screen, additional_points_color, c, node_radius)
+            for building_name in highlight_buildings:
+                building = self.parser.short_to_building[building_name]
+                c = Graph.__normalize_coordinates(building.coordinates, display_dimensions)
+                pygame.draw.circle(screen, highlight_building_color, c, building_radius)
+
             pygame.display.flip()
         pygame.quit()
 
@@ -138,6 +165,16 @@ building = g.parser.short_to_building['MGH']
 node = g.nodes[building.coordinates]
 
 # bfs from node
-paths = g.bfs_paths(g, node)
-for p in paths:
-    print('(' + str(p.start[0]) + ', ' + str(p.start[1]) + ') to ' '(' + str(p.end[0]) + ', ' + str(p.end[1]) + ')')
+paths = g.bfs_paths(g, node, 15)
+for path in paths:
+    print('(' + str(path.start[0]) + ', ' + str(path.start[1]) + ') to ' '(' + str(path.end[0]) + ', ' + str(path.end[1]) + ')')
+
+# get points along each path
+points = []
+for path in paths:
+    points += path.get_points(1)
+    for point in points:
+        print(point)
+
+# visualize with highlighted points
+g.visualize(highlight_buildings=['MGH'], highlight_paths=paths, additional_points=points)
