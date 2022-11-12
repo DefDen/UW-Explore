@@ -13,15 +13,11 @@ class Node:
         self.neighbors = {}
 
 class Edge:
-    def __init__(self, start=(0,0), end=(0,0), distance=0, path=None):
-        if path:
-            self.start = path.start
-            self.end = path.end
-            self.distance = path.distance
-        else:
-            self.start = start
-            self.end = end
-            self.distance = distance
+    def __init__(self, path=None):
+        self.path = path
+        self.start = path.start
+        self.end = path.end
+        self.distance = path.distance
 
 class Graph:
     def __init__(self):
@@ -106,19 +102,20 @@ class Graph:
         return (new_x + padding, new_y + padding)
 
     # returns the set of paths traversed by bfs up to a certain depth
-    def bfs_paths(self, start_node, depth=3):
+    def bfs_paths(self, graph, node, depth=3):
         visited = set()
         traversed = set()
         queue = []
-        queue.append(start)
+        queue.append(node)
         current_depth = 0
-        while queue and current_depth <= depth:
+        while len(queue) != 0 and current_depth <= depth:
             n = queue.pop(0)
             if n in visited: continue
             visited.add(n)
             for c in n.neighbors.keys():
                 edge = n.neighbors[c]
-                traversed.append(edge)
+                queue.append(graph.nodes[edge.end])
+                traversed.add(edge)
             current_depth += 1
         return traversed
 
@@ -137,12 +134,10 @@ print('is_connected = ' + str(g.is_connected()))
 g.visualize()
 """
 # get a node from the graph
-key = None
-for k in g.nodes.keys():
-    key = k
-    break
-# use key to get node
-node = g.nodes[key]
-paths = g.bfs_paths(node)
+building = g.parser.short_to_building['MGH']
+node = g.nodes[building.coordinates]
+
+# bfs from node
+paths = g.bfs_paths(g, node)
 for p in paths:
-    print(p)
+    print('(' + str(p.start[0]) + ', ' + str(p.start[1]) + ') to ' '(' + str(p.end[0]) + ', ' + str(p.end[1]) + ')')
